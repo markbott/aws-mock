@@ -4,14 +4,36 @@ This script runs a reverse proxy on http://localhost:9090/ to the actual backend
 
 'use strict';
 
-var httpProxy = require('http-proxy'),
-options = {
-    router: {
-        'localhost/': 'http://localhost:8001/aws-mock/ec2-endpoint/'
-    }
-},
-proxyServer = httpProxy.createServer(options);
+var http = require('http'),
+    httpProxy = require('http-proxy'),
+    httpProxyRules = require('http-proxy-rules');
 
-proxyServer.listen(9090);
-console.log("Proxy running on http://localhost:9090/");
+var proxyRules = new httpProxyRules({
+    rules: {
+      '.*': 'http://192.168.92.1:8002/aws-mock/ec2-endpoint/'
+    }
+});
+
+// Create reverse proxy instance
+var proxy = httpProxy.createProxy();
+
+// Create http server that leverages reverse proxy instance
+// and proxy rules to proxy requests to different targets
+http.createServer(function(req, res) {
+
+    // a match method is exposed on the proxy rules instance
+    // to test a request to see if it matches against one of the specified rules
+    var target = proxyRules.match(req);
+    if (target) {
+       return proxy.web(req, res, {
+        target: target
+      });
+    }
+
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('The request url and path did not match any of the listed rules!');
+}).listen(9090, function(err,data) {
+    if(!err) console.log("Proxy running on http://localhost:9090/");
+    else console.log("Error: " + err);
+});
 
