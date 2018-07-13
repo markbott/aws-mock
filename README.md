@@ -56,7 +56,7 @@ For more information, please refer to the [Technical Specifications](https://git
 ```
 git clone https://github.com/treelogic-swe/aws-mock.git
 cd aws-mock
-gradle jettyRun
+gradle integrationTomcatRun
 ```
 That's all.
 
