@@ -476,6 +476,8 @@ public final class MockEC2QueryHandler {
                 String version = versionParamValues[0];
 
                 String[] actions = queryParams.get("Action");
+                
+                String [] dryRun = queryParams.get("DryRun");
 
                 if (null == actions || actions.length != 1) {
                     // no action found - write response for error
@@ -483,6 +485,12 @@ public final class MockEC2QueryHandler {
                     responseXml = getXmlError("InvalidQuery",
                             "There should be a parameter of 'Action' provided in the query! "
                                     + REF_EC2_QUERY_API_DESC);
+                } else if (null != dryRun && dryRun.length >= 1 && dryRun[0].equals("true")) {
+                    // no action found - write response for error
+                    response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    responseXml = getXmlError("DryRunOperation",
+                            "Dry run operation message");
+                	
                 } else {
 
                     String action = actions[0];
