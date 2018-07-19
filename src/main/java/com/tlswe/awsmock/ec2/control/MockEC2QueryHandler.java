@@ -481,6 +481,8 @@ public final class MockEC2QueryHandler {
                 String[] actions = queryParams.get("Action");
                 
                 String [] dryRun = queryParams.get("DryRun");
+                
+                log.info("Actions: " + StringUtils.join(actions, ",") + "; dry run: " + StringUtils.join(dryRun, ","));
 
                 if (null == actions || actions.length != 1) {
                     // no action found - write response for error
