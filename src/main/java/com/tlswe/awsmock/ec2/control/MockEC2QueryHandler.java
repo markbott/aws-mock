@@ -58,6 +58,7 @@ import com.tlswe.awsmock.ec2.cxf_generated.DescribeImagesResponseItemType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeImagesResponseType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeInstancesResponseType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeInternetGatewaysResponseType;
+import com.tlswe.awsmock.ec2.cxf_generated.DescribeRegionsResponseType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeRouteTablesResponseType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeSecurityGroupsResponseType;
 import com.tlswe.awsmock.ec2.cxf_generated.DescribeSubnetsResponseType;
@@ -78,6 +79,8 @@ import com.tlswe.awsmock.ec2.cxf_generated.InternetGatewayType;
 import com.tlswe.awsmock.ec2.cxf_generated.IpPermissionSetType;
 import com.tlswe.awsmock.ec2.cxf_generated.IpPermissionType;
 import com.tlswe.awsmock.ec2.cxf_generated.PlacementResponseType;
+import com.tlswe.awsmock.ec2.cxf_generated.RegionItemType;
+import com.tlswe.awsmock.ec2.cxf_generated.RegionSetType;
 import com.tlswe.awsmock.ec2.cxf_generated.ReservationInfoType;
 import com.tlswe.awsmock.ec2.cxf_generated.ReservationSetType;
 import com.tlswe.awsmock.ec2.cxf_generated.RouteSetType;
@@ -514,6 +517,9 @@ public final class MockEC2QueryHandler {
                             Set<String> imageIDs = parseImageIDs(queryParams);
                             responseXml = JAXBUtil.marshall(describeImages(imageIDs),
                                     "DescribeImagesResponse", version);
+                        } else if ("DescribeRegions".equals(action)) {
+                            responseXml = JAXBUtil.marshall(describeRegions(),
+                                    "DescribeRegionsResponse", version);
                         } else {
 
                             // the following interface calls need instanceIDs
@@ -939,7 +945,28 @@ public final class MockEC2QueryHandler {
         response.getWriter().flush();
     }
 
-    /**
+    private DescribeRegionsResponseType describeRegions() {
+    	DescribeRegionsResponseType ret = new DescribeRegionsResponseType();
+    	
+    	RegionSetType regionSet = new RegionSetType();
+    	
+    	final String [] regions = {
+    			"us-east-1", "http://awsmock:8080/aws-mock/ec2-endpoint/",
+    			"us-west-1", "http://awsmock:8080/aws-mock/ec2-endpoint/"
+    	};
+    	
+    	for(int i = 0; i < regions.length/2; i++) {
+    		RegionItemType r = new RegionItemType();
+    		r.setRegionName(regions[2*i]);
+    		r.setRegionEndpoint(regions[2*i+1]);
+    		regionSet.getItem().add(r);
+    	}
+    	
+    	ret.setRegionInfo(regionSet);
+		return ret;
+	}
+
+	/**
      * Parse instance states from query parameters.
      *
      * @param queryParams
