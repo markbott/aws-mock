@@ -510,9 +510,13 @@ public final class MockEC2QueryHandler {
                             String instanceType = queryParams.get("InstanceType")[0];
                             int minCount = Integer.parseInt(queryParams.get("MinCount")[0]);
                             int maxCount = Integer.parseInt(queryParams.get("MaxCount")[0]);
-
+                            String subnetId = null;
+                            if(queryParams.containsKey("SubnetId")) {
+                            	subnetId = queryParams.get("SubnetId")[0];
+                            }
+                            		
                             responseXml = JAXBUtil.marshall(
-                                    runInstances(imageID, instanceType, minCount, maxCount),
+                                    runInstances(imageID, instanceType, subnetId, minCount, maxCount),
                                     "RunInstancesResponse", version);
 
                         } else if ("DescribeImages".equals(action)) {
@@ -954,7 +958,7 @@ public final class MockEC2QueryHandler {
     	
     	final String [] regions = {
     			"us-east-1", "http://awsmock:8080/aws-mock/ec2-endpoint/",
-    			"us-west-1", "http://awsmock:8080/aws-mock/ec2-endpoint/"
+//    			"us-west-1", "http://awsmock:8080/aws-mock/ec2-endpoint/"
     	};
     	
     	for(int i = 0; i < regions.length/2; i++) {
@@ -1173,9 +1177,10 @@ public final class MockEC2QueryHandler {
                 instItem.setDnsName(instance.getPubDns());
 
                 // set network information
-                instItem.setVpcId(MOCK_VPC_ID);
+                instItem.setSubnetId(instance.getSubnetId());
+                MockSubnet subnet = mockSubnetController.getSubnet(instance.getSubnetId());
+                instItem.setVpcId(subnet == null ? MOCK_VPC_ID : subnet.getVpcId());
                 instItem.setPrivateIpAddress(MOCK_PRIVATE_IP_ADDRESS);
-                instItem.setSubnetId(MOCK_SUBNET_ID);
 
                 instsSet.getItem().add(instItem);
 
@@ -1227,7 +1232,7 @@ public final class MockEC2QueryHandler {
      * @return a RunInstancesResponse that includes all information for the started new mock ec2 instances
      */
     private RunInstancesResponseType runInstances(final String imageId, final String instanceType,
-            final int minCount, final int maxCount) {
+            final String subnetId, final int minCount, final int maxCount) {
 
         RunInstancesResponseType ret = new RunInstancesResponseType();
 
@@ -1248,8 +1253,13 @@ public final class MockEC2QueryHandler {
 
         List<AbstractMockEc2Instance> newInstances = null;
 
+        String createInSubnet = subnetId;
+        if(createInSubnet == null) {
+        	createInSubnet = MOCK_SUBNET_ID;
+        }
+        
         newInstances = mockEc2Controller
-                .runInstances(clazzOfMockEc2Instance, imageId, instanceType, minCount, maxCount);
+                .runInstances(clazzOfMockEc2Instance, imageId, instanceType, createInSubnet, minCount, maxCount);
 
         for (AbstractMockEc2Instance i : newInstances) {
             RunningInstancesItemType instItem = new RunningInstancesItemType();
@@ -1264,9 +1274,10 @@ public final class MockEC2QueryHandler {
             instItem.setPlacement(DEFAULT_MOCK_PLACEMENT);
 
             // set network information
-            instItem.setVpcId(MOCK_VPC_ID);
+            instItem.setSubnetId(i.getSubnetId());
+            MockSubnet subnet = mockSubnetController.getSubnet(i.getSubnetId());
+            instItem.setVpcId(subnet == null ? MOCK_VPC_ID : subnet.getVpcId());
             instItem.setPrivateIpAddress(MOCK_PRIVATE_IP_ADDRESS);
-            instItem.setSubnetId(MOCK_SUBNET_ID);
 
             instSet.getItem().add(instItem);
 

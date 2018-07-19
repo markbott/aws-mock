@@ -151,7 +151,7 @@ public final class MockEc2Controller {
      */
     public <T extends AbstractMockEc2Instance> List<T> runInstances(final Class<? extends T> clazz,
             final String imageId, final String instanceTypeName,
-            final int minCount, final int maxCount) {
+            final String subnetId, final int minCount, final int maxCount) {
 
         // EC2 Query Request action name
         final String action = "runInstances";
@@ -201,6 +201,7 @@ public final class MockEc2Controller {
             }
             inst.setImageId(imageId);
             inst.setInstanceType(instanceType);
+            inst.setSubnetId(subnetId);
             // inst.setSecurityGroups(securityGroups);
 
             inst.start();

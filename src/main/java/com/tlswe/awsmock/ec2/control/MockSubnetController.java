@@ -121,4 +121,8 @@ public final class MockSubnetController {
             }
         }
     }
+    
+    public MockSubnet getSubnet(final String subnetId) {
+    	return allMockSubnets.get(subnetId);
+    }
 }

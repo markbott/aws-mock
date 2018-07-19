@@ -534,6 +534,11 @@ public abstract class AbstractMockEc2Instance implements Serializable {
     private Set<String> securityGroups = new TreeSet<String>();
 
     /**
+     * Subnet ID for this ec2 instance
+     */
+    private String subnetId = null;
+    
+    /**
      * Flag that indicates whether internal timer of this mock ec2 instance has been started (on instance start()).
      */
     private boolean internalTimerInitialized = false;
@@ -857,6 +862,14 @@ public abstract class AbstractMockEc2Instance implements Serializable {
         if (null != newSecurityGroups) {
             this.securityGroups = newSecurityGroups;
         }
+    }
+    
+    public final void setSubnetId(final String subnetId) {
+    	this.subnetId = subnetId;
+    }
+    
+    public final String getSubnetId() {
+    	return this.subnetId;
     }
 
     /**
